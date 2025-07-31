@@ -30,16 +30,20 @@ export default function ProductsPage() {
             key={product.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
           >
-            {/* Optional placeholder if you don't have product images */}
+            {/* Placeholder letter, safely access product.name */}
             <div className="h-48 bg-gray-200 flex items-center justify-center text-gray-400 text-3xl font-bold">
-              {product.name[0].toUpperCase()}
+              {(product.name && product.name.length > 0) ? product.name[0].toUpperCase() : '?'}
             </div>
 
             <div className="p-4">
-              <h2 className="text-lg font-semibold text-gray-900">{product.name}</h2>
-              <p className="text-gray-600 mb-1">{product.brand}</p>
-              <p className="text-indigo-600 font-bold text-xl">₹{product.retail_price}</p>
-              <p className="text-sm text-gray-400 mt-2">{product.category}</p>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {product.name || 'Unnamed Product'}
+              </h2>
+              <p className="text-gray-600 mb-1">{product.brand || 'Unknown Brand'}</p>
+              <p className="text-indigo-600 font-bold text-xl">
+                ₹{product.retail_price || 'N/A'}
+              </p>
+              <p className="text-sm text-gray-400 mt-2">{product.category || 'Uncategorized'}</p>
             </div>
           </Link>
         ))}

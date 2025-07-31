@@ -1,10 +1,8 @@
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, abort
 import psycopg2
-import os
 
 app = Flask(__name__)
 
-# You may want to load these from environment variables in production
 DB_CONFIG = {
     'host': 'localhost',
     'dbname': 't41_db',
@@ -18,19 +16,16 @@ def get_db_connection():
 
 @app.route('/api/products', methods=['GET'])
 def get_products():
-    """List products with optional pagination."""
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 20))
-    offset = (page - 1) * per_page
-
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # Get total number of products (for pagination info)
-        cur.execute('SELECT COUNT(*) FROM products')
-        total = cur.fetchone()[0]
-        
-        cur.execute('SELECT * FROM products ORDER BY id LIMIT %s OFFSET %s', (per_page, offset))
+        cur.execute("""
+            SELECT p.id, p.cost, p.category, p.name, p.brand, p.retail_price,
+                   d.name AS department_name, p.sku, p.distribution_center_id
+            FROM products p
+            LEFT JOIN departments d ON p.department_id = d.id
+            ORDER BY p.id;
+        """)
         rows = cur.fetchall()
         columns = [desc[0] for desc in cur.description]
         products = [dict(zip(columns, row)) for row in rows]
@@ -38,31 +33,29 @@ def get_products():
         cur.close()
         conn.close()
 
-    return jsonify({
-        'products': products,
-        'pagination': {
-            'page': page,
-            'per_page': per_page,
-            'total': total,
-            'pages': -(-total // per_page)  # ceiling division
-        }
-    })
+    return jsonify({'products': products})
 
 @app.route('/api/products/<int:product_id>', methods=['GET'])
 def get_product(product_id):
-    """Fetch a product by ID."""
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        cur.execute('SELECT * FROM products WHERE id = %s', (product_id,))
+        cur.execute("""
+            SELECT p.id, p.cost, p.category, p.name, p.brand, p.retail_price,
+                   d.name AS department_name, p.sku, p.distribution_center_id
+            FROM products p
+            LEFT JOIN departments d ON p.department_id = d.id
+            WHERE p.id = %s;
+        """, (product_id,))
         row = cur.fetchone()
-        if not row:
+        if row is None:
             abort(404, description="Product not found")
         columns = [desc[0] for desc in cur.description]
         product = dict(zip(columns, row))
     finally:
         cur.close()
         conn.close()
+
     return jsonify(product)
 
 @app.errorhandler(404)
