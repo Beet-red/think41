@@ -8,7 +8,7 @@ export default function Header() {
         <nav className="space-x-4">
           <Link to="/" className="hover:underline">Products</Link>
           {/* Add more nav links here */}
-          <Link to="/departments" className="text-blue-600 hover:underline ml-4">
+          <Link to="/departments" className="bg-indigo-700 text-white py-4 shadow-md">
                 Browse Departments
             </Link>
 

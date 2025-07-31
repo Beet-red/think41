@@ -11,25 +11,18 @@ export default function DepartmentsPage() {
       .then(data => {
         setDepartments(data.departments || []);
         setLoading(false);
-      })
-      .catch(() => {
-        setDepartments([]);
-        setLoading(false);
       });
   }, []);
 
-  if (loading) return <div className="text-center py-10">Loading departments...</div>;
-
-  if (departments.length === 0) return <div className="text-center py-10">No departments found.</div>;
-
+  if (loading) return <div className="text-center py-10">Loading...</div>;
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-4xl font-bold mb-8 text-center">Departments</h1>
+      <h1 className="text-3xl font-bold mb-6">Departments</h1>
       <ul className="space-y-4 max-w-md mx-auto">
         {departments.map(dept => (
           <li key={dept.id} className="border rounded p-4 hover:shadow-lg transition">
-            <Link to={`/departments/${dept.id}`} className="text-indigo-700 font-semibold">
-              {dept.name} ({dept.product_count} products)
+            <Link to={`/departments/${dept.id}`}>
+              {dept.name} <span className="text-gray-500">({dept.product_count} products)</span>
             </Link>
           </li>
         ))}
